@@ -1,13 +1,156 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Link Manager Pro ANGULAR</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Manager Pro</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/front/styless.css">
   <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 </head>
 <body>
-  <app-root></app-root>
+  <header class="header">
+    <div class="header-content">
+      <div class="logo">
+        <i class="fas fa-link"></i>
+        <span>Link Manager Pro</span>
+      </div>
+      <nav class="nav-menu">
+        <a href="#" class="nav-link active">Home</a>
+        <a href="#" class="nav-link">Categories</a>
+        <a href="#" class="nav-link">Profile</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <section class="intro-section">
+      <div class="intro-content">
+
+        <dotlottie-player 
+            src="https://lottie.host/996840b9-749a-4fa3-81ee-246369d6a679/9nZVFpo0no.lottie" 
+            background="transparent" 
+            speed="1" 
+            style="width: 300px; height: 300px" 
+            loop 
+            autoplay>
+        </dotlottie-player>
+        <div class="intro-text">
+          <p>Link Manager Pro te permite organizar y compartir tus enlaces favoritos de manera eficiente. Guarda, categoriza y comenta los recursos más importantes para ti.</p>
+          <div class="feature-grid">
+            <div class="feature-item">
+              <i class="fas fa-tags"></i>
+              <p>Organiza con etiquetas</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-comments"></i>
+              <p>Comenta y comparte</p>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-vote-yea"></i>
+              <p>Vota los mejores enlaces</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section id="addLinkSection" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-plus-circle"></i>
+        Añadir nuevo enlace
+      </h2>
+      <form id="addLinkForm" (ngSubmit)="addLink()" class="form-container">
+        <input type="text" [(ngModel)]="newLink.title" name="title" placeholder="Título" required />
+        <input type="url" [(ngModel)]="newLink.url" name="url" placeholder="URL" required />
+        <input type="text" [(ngModel)]="newLink.tags" name="tags" placeholder="Etiquetas (separadas por comas)" />
+        <button type="submit">Añadir enlace</button>
+      </form>
+    
+      <h2 class="section-title">
+        <i class="fa-solid fa-filter"></i>
+        Buscar por etiqueta
+      </h2> 
+        <form id="searchForm" (ngSubmit)="search()" class="search-form">
+          <input type="text" [(ngModel)]="searchTags" name="searchTags" placeholder="Buscar por etiquetas (separadas por comas)">
+          <button type="submit">Buscar</button>
+        </form>
+  </section>
+
+    <section id="linksContainer" class="section">
+      <h2 class="section-title">
+        <i class="fas fa-list"></i>
+        Lista de enlaces
+      </h2>
+      <div id="linksList" class="links-grid">
+        <div *ngFor="let link of links" class="link-item">
+          <h3>{{link.title}}</h3>
+          <p>Votos: {{link.votes}}</p>
+          <div class="vote-buttons">
+            <button (click)="vote(link._id, 'up')" class="vote-btn">
+              <i class="fas fa-thumbs-up"></i>
+            </button>
+            <button (click)="vote(link._id, 'down')" class="vote-btn">
+              <i class="fas fa-thumbs-down"></i>
+            </button>
+          </div>
+          <p>Tags: {{link.tags.join(', ')}}</p>
+          <button (click)="showLinkDetails(link._id)" class="details-btn">Ver detalles</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div *ngIf="showDetails && selectedLink" class="details-page">
+    <section class="details-section">
+      <h2 class="details-title">{{selectedLink.title}}</h2>
+      <p class="details-info"><strong>URL:</strong> <a [href]="selectedLink.url" target="_blank">{{selectedLink.url}}</a></p>
+      <p class="details-info"><strong>Etiquetas:</strong> {{selectedLink.tags.join(', ')}}</p>
+      <p class="details-info"><strong>Votos:</strong> {{selectedLink.votes}}</p>
+      <div class="vote-buttons">
+        <button (click)="vote(selectedLink._id, 'up')" class="vote-btn">
+          <i class="fas fa-thumbs-up"></i>
+        </button>
+        <button (click)="vote(selectedLink._id, 'down')" class="vote-btn">
+          <i class="fas fa-thumbs-down"></i>
+        </button>
+      </div>
+    </section>
+
+    <section class="comments-section">
+      <h2 class="section-title">
+        <i class="fas fa-comments"></i>
+        Comentarios
+      </h2>
+      <div class="comments-container">
+        <div *ngFor="let comment of selectedLink.comments" class="comment">
+          <p>{{comment.text}}</p>
+        </div>
+      </div>
+      <form (ngSubmit)="addComment(selectedLink._id)" class="comment-form">
+        <textarea [(ngModel)]="newComment" name="commentText" placeholder="Escribe tu comentario aquí" required></textarea>
+        <button type="submit">
+          <i class="fas fa-paper-plane"></i>
+          Añadir comentario
+        </button>
+      </form>
+    </section>
+
+    <button (click)="backToHome()" class="back-button">
+      <i class="fas fa-arrow-left"></i>
+      Volver al inicio
+    </button>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <p>&copy; <span id="current-year"></span> Link Manager Pro</p>
+      <div class="footer-links">
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>
